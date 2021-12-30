@@ -1,0 +1,891 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+		<title>Content Generator</title>
+		<meta charset="UTF-8">
+		<meta name="description" content="Content Generator for Dan Cuccia's indie game" />
+		<meta name="keywords" content="Dan Cuccia, Content Generator" />
+		<meta name="viewport" content="user-scalable=no, initial-scale=1, minimum-scale=1, maximum-scale=1" />
+
+		<link rel="stylesheet" type="text/css" href="css/reset.css">
+		<link rel="stylesheet" type="text/css" href="css/bootstrap.css">
+		<link rel="stylesheet" type="text/css" href="css/bootstrap-theme.css">
+		<link rel="stylesheet" type="text/css" href="css/default.css">
+		<link rel="stylesheet" type="text/css" href="css/font-awesome.css">
+
+		<script type="text/javascript" data-main="js/main" src="js/lib/require.js"></script>
+    </head>
+    <body>
+    	<input id="fproxy" type="file" style="display: none;" />
+		<div id="content" class="app-content">
+			<div id="innerBody"></div>
+		</div>
+
+		<!-- 			===================== 				-->
+		<!-- 				  Templates 					-->
+		<!-- 			===================== 				-->
+
+		<template id="mainmenu-page-template">
+			<div>
+				<div id="main-menu" class="main-menu-t">
+					<div id="menu" class="panel panel-default main-menu">
+						<div class="panel-heading">
+							<div class="align-cntr">
+								<div class="color-white">||str:MMTitle||</div>
+								<div class="color-white">||str:MMCurrentProject||<span class="mm-proj-name">{{ ProjectName }}<span></div>
+							</div>
+						</div>
+						<div class="panel-content">
+							<button id="mm-goto-projmenu" class="btn btn-lg main-menu-btn">||str:MMProjectMenu||</button>
+							<button id="mm-goto-editor" class="btn btn-lg main-menu-btn">||str:MMEditorBtn||</button>
+							<button id="mm-goto-compeditor" class="btn btn-lg main-menu-btn">||str:MMComponentEditorBtn||</button>
+							<button id="mm-goto-viewer" class="btn btn-lg main-menu-btn">||str:MMProjectViewerBtn||</button>
+							<button id="mm-goto-simulator" class="btn btn-lg main-menu-btn">||str:MMSimulatorBtn||</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</template>
+
+		<template id="messagebox-template">
+			<div>
+				<div class="mbox-blocker"></div>
+				<div class="row mbox-top">
+					<div class="col-md-6 col-md-offset-3 mbox-inter">
+						<div class="panel panel-default mbox">
+							<div class="panel-heading">{{ Message }}</div>
+							<div class="panel-content mbox-content"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</template>
+
+		<template id="editor-menubar-template">
+			<div>
+				<div class="navbar navbar-default">
+					<div class="container-fluid bkg-grey">
+						<div class="navbar-header">
+							<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#gen-menubar-options">
+								<span class="sr-only">Toggle Nav</span>
+								<span class="icon-bar"></span>
+								<span class="icon-bar"></span>
+								<span class="icon-bar"></span>
+							</button>
+							<a class="navbar-brand" href="javascript:;">||str:Title||</a>
+						</div>
+						<div id="gen-menubar-options" class="collapse navbar-collapse">
+							<ul class="nav navbar-nav">
+								<li class="dropdown">
+									<a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown">||str:MBFile|| <span class="caret"></span></a>
+									<ul class="dropdown-menu">
+										<li><a id="file-new" href="javascript:;">||str:MBNewProj||</a></li>
+										<li><a id="file-load" href="javascript:;">||str:MBLoadProj||</a></li>
+										<li class="divider"></li>
+										<li><a id="file-save" href="javascript:;">||str:MBSave||</a></li>
+										<li><a id="file-save-as" href="javascript:;">||str:MBSaveAs||</a></li>
+										<li class="dropdown dropdown-submenu"><a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown">||str:MBExport||</a>
+											<ul class="dropdown-menu">
+												<li><a id="file-save-cgen" href="javascript:;">||str:MBExportCGEN||</a></li>
+												<li><a id="file-save-json" href="javascript:;">||str:MBExportJSON||</a></li>
+												<li><a id="file-save-xml" href="javascript:;">||str:MBExportXML||</a></li>
+											</ul>
+										</li>
+										<li class="divider"></li>
+										<li><a id="file-quit" href="javascript:;">||str:MBQuit||</a></li>
+									</ul>
+								</li>
+								<li class="dropdown">
+									<a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown">||str:MBEdit|| <span class="caret"></span></a>
+									<ul class="dropdown-menu">
+										<li id="edit-create" class="dropdown dropdown-submenu"><a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown">||str:MBCreate||</a>
+											<ul class="dropdown-menu">
+												<li><a id="edit-create-empty" href="javascript:;">||str:MBEmptyObj||</a></li>
+												<li><a id="edit-create-keyitem" href="javascript:;">||str:MBKeyItem||</a></li>
+												<li><a id="edit-create-consumable" href="javascript:;">||str:MBConsumable||</a></li>
+												<li><a id="edit-create-armor" href="javascript:;">||str:MBArmor||</a></li>
+												<li><a id="edit-create-weapon" href="javascript:;">||str:MBWeapon||</a></li>
+											</ul>
+										</li>
+									</ul>
+								</li>
+								<li class="dropdown">
+									<a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown">||str:MBHelp|| <span class="caret"></span></a>
+									<ul class="dropdown-menu">
+										<li class="divider"></li>
+										<li><a id="help-about" href="javascript:;">||str:MBAbout||</a></li>
+									</ul>
+								</li>
+							</ul>
+							<form class="navbar-form navbar-left" role="search">
+								<div class="form-group">
+									<input id="menubar-search-input" type="text" class="form-control" placeholder="||str:MBSearchInputPH||">
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+		</template>
+
+		<template id="editor-page-template">
+			<div>
+				<div id="editor-menubar" class="menubar"></div>
+				<div class="editor-displayfield">
+					<div class="row gen-disp-main">
+						<div id="editor-displayfield" class="col-md-8 gen-view-field">
+							<div id="df-drag-interface" class="pos-abs-wh df-drag-interface">
+								<div id="df-front" class="pos-abs-wh df-zoom-shift df-front">
+									<div class="pos-abs-wh df-zoom-container">
+										<div class="pos-abs-wh df-item-container df-move" style="left: 0px; top: 0px"></div>
+										<div class="pos-abs-wh df-connect-container df-move" style="left: 0px; top: 0px"></div>
+									</div>
+								</div>
+							</div>
+							<div id="df-bkg" class="pos-abs-wh df-bkg">
+								<div id="editor-grid" class="pos-abs-wh"></div>
+							</div>
+						</div>
+						<div id="editor-propertyfield" class="col-md-4 gen-prop-field"></div>
+					</div>
+				</div>
+				<div id="editor-datafield" class="datafield"></div>
+			</div>
+		</template>
+
+		<template id="stats-template">
+			<div>
+				<div class="panel panel-default">
+					<div class="panel-body stats-container">
+						<div class="row stat-row">
+							<div class="col-md-4">
+								<div class="stat-abbr color-white">||str:HP-abbr||</div>
+								<input type="text" class="form-control stat-input-HP" value="{{ HP }}" />
+							</div>
+							<div class="col-md-4">
+								<div class="stat-abbr color-white">||str:MP-abbr||</div>
+								<input type="text" class="form-control stat-input-MP" value="{{ MP }}" />
+							</div>
+							<div class="col-md-4">
+								<div class="stat-abbr color-white">||str:SP-abbr||</div>
+								<input type="text" class="form-control stat-input-SP" value="{{ SP }}" />
+							</div>
+						</div>
+						<div class="divider-line"></div>
+						<div class="well well-sm">
+							<div class="row">
+								<div class="col-md-6">
+									<div class="col-md-6">
+										<div class="stat-titles">
+											<div class="stat-abbr color-white">||str:STR-abbr||</div>
+											<div class="stat-title color-white">||str:STR-full||</div>
+										</div>
+									</div>
+									<div class="col-md-6">
+										<input type="text" class="form-control stat-input-STR" value="{{ STR }}" />
+									</div>
+								</div>
+								<div class="col-md-6">
+									<div class="col-md-6">
+										<div class="stat-titles">
+											<div class="stat-abbr color-white">||str:DEX-abbr||</div>
+											<div class="stat-title color-white">||str:DEX-full||</div>
+										</div>
+									</div>
+									<div class="col-md-6">
+										<input type="text" class="form-control stat-input-DEX" value="{{ DEX }}" />
+									</div>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-md-6">
+									<div class="col-md-6">
+										<div class="stat-titles">
+											<div class="stat-abbr color-white">||str:VIT-abbr||</div>
+											<div class="stat-title color-white">||str:VIT-full||</div>
+										</div>
+									</div>
+									<div class="col-md-6">
+										<input type="text" class="form-control stat-input-VIT" value="{{ VIT }}"/>
+									</div>
+								</div>
+								<div class="col-md-6">
+									<div class="col-md-6">
+										<div class="stat-titles">
+											<div class="stat-abbr color-white">||str:CON-abbr||</div>
+											<div class="stat-title color-white">||str:CON-full||</div>
+										</div>
+									</div>
+									<div class="col-md-6">
+										<input type="text" class="form-control stat-input-CON" value="{{ CON }}" />
+									</div>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-md-6">
+									<div class="col-md-6">
+										<div class="stat-titles">
+											<div class="stat-abbr color-white">||str:EVA-abbr||</div>
+											<div class="stat-title color-white">||str:EVA-full||</div>
+										</div>
+									</div>
+									<div class="col-md-6">
+										<input type="text" class="form-control stat-input-EVA" value="{{ EVA }}" />
+									</div>
+								</div>
+								<div class="col-md-6">
+									<div class="col-md-6">
+										<div class="stat-titles">
+											<div class="stat-abbr color-white">||str:WIS-abbr||</div>
+											<div class="stat-title color-white">||str:WIS-full||</div>
+										</div>
+									</div>
+									<div class="col-md-6">
+										<input type="text" class="form-control stat-input-WIS" value="{{ WIS }}" />
+									</div>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-md-6">
+									<div class="col-md-6">
+										<div class="stat-titles">
+											<div class="stat-abbr color-white">||str:INT-abbr||</div>
+											<div class="stat-title color-white">||str:INT-full||</div>
+										</div>
+									</div>
+									<div class="col-md-6">
+										<input type="text" class="form-control stat-input-INT" value="{{ INT }}" />
+									</div>
+								</div>
+								<div class="col-md-6">
+									<div class="col-md-6">
+										<div class="stat-titles">
+											<div class="stat-abbr color-white">||str:MND-abbr||</div>
+											<div class="stat-title color-white">||str:MND-full||</div>
+										</div>
+									</div>
+									<div class="col-md-6">
+										<input type="text" class="form-control stat-input-MND" value="{{ MND }}" />
+									</div>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-md-6">
+									<div class="col-md-6">
+										<div class="stat-titles">
+											<div class="stat-abbr color-white">||str:TRQ-abbr||</div>
+											<div class="stat-title color-white">||str:TRQ-full||</div>
+										</div>
+									</div>
+									<div class="col-md-6">
+										<input type="text" class="form-control stat-input-TRQ" value="{{ TRQ }}" />
+									</div>
+								</div>
+								<div class="col-md-6">
+									<div class="col-md-6">
+										<div class="stat-titles">
+											<div class="stat-abbr color-white">||str:BKR-abbr||</div>
+											<div class="stat-title color-white">||str:BKR-full||</div>
+										</div>
+									</div>
+									<div class="col-md-6">
+										<input type="text" class="form-control stat-input-BKR" value="{{ BKR }}" />
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</template>
+
+		<template id="equip-slots-dd-template">
+			<div>
+				<div class="dropdown">
+					<button class="btn btn-default color-white dropdown-toggle" type="button" data-toggle="dropdown"><span class="change-txt-target">{{ EquipSlotName }}</span><span class="caret"></span></button>
+					<ul class="dropdown-menu">
+						<li><a class="weapon-dd-0 equip-dd-option" href="javascript:;">||str:Dagger||</a></li>
+						<li><a class="weapon-dd-1 equip-dd-option" href="javascript:;">||str:Sword||</a></li>
+						<li><a class="weapon-dd-2 equip-dd-option" href="javascript:;">||str:GreatSword||</a></li>
+						<li><a class="weapon-dd-3 equip-dd-option" href="javascript:;">||str:Fists||</a></li>
+						<li><a class="weapon-dd-5 equip-dd-option" href="javascript:;">||str:Bow||</a></li>
+						<li><a class="weapon-dd-6 equip-dd-option" href="javascript:;">||str:Wand||</a></li>
+						<li><a class="weapon-dd-7 equip-dd-option" href="javascript:;">||str:Staff||</a></li>
+						<li><a class="weapon-dd-8 equip-dd-option" href="javascript:;">||str:Dolls||</a></li>
+						<li><div class="divider-line"></div></li>
+						<li><a class="armor-dd-0 equip-dd-option" href="javascript:;">||str:Head||</a></li>
+						<li><a class="armor-dd-1 equip-dd-option" href="javascript:;">||str:EaringLeft||</a></li>
+						<li><a class="armor-dd-2 equip-dd-option" href="javascript:;">||str:EaringRight||</a></li>
+						<li><a class="armor-dd-3 equip-dd-option" href="javascript:;">||str:Neck||</a></li>
+						<li><a class="armor-dd-4 equip-dd-option" href="javascript:;">||str:Shoulders||</a></li>
+						<li><a class="armor-dd-5 equip-dd-option" href="javascript:;">||str:Body||</a></li>
+						<li><a class="armor-dd-6 equip-dd-option" href="javascript:;">||str:Hands||</a></li>
+						<li><a class="armor-dd-7 equip-dd-option" href="javascript:;">||str:RingLeft||</a></li>
+						<li><a class="armor-dd-8 equip-dd-option" href="javascript:;">||str:RingRight||</a></li>
+						<li><a class="armor-dd-9 equip-dd-option" href="javascript:;">||str:Belt||</a></li>
+						<li><a class="armor-dd-10 equip-dd-option" href="javascript:;">||str:Legs||</a></li>
+						<li><a class="armor-dd-11 equip-dd-option" href="javascript:;">||str:Shoes||</a></li>
+					</ul>
+				</div>
+			</div>
+		</template>
+
+		<template id="components-template">
+			<div>
+				<div class="row">
+					<div class="col-md-12">
+						<button id="comp-delete" class="btn btn-default color-white">
+							<span class="fa fa-trash-o color-white"></span>
+						</button>
+						<button id="comp-children" class="btn btn-default color-white">
+							<span class="fa fa-level-down color-white"></span>
+						</button>
+						<button id="comp-parents" class="btn btn-default color-white">
+							<span class="fa fa-level-up color-white"></span>
+						</button>
+					</div>
+				</div>
+				<div class="divider-line"></div>
+				<div class="row">
+					<div class="col-md-6">
+						<div class="components-heading">||str:Components||</div>
+					</div>
+					<div class="col-md-6">
+						<div class="comp-notifications"></div>
+					</div>
+				</div>
+				<ul id="component-tabs" class="nav nav-tabs"></ul>
+				<i class="fa fa-plus-square-o"></i>
+				<div id="component-prop-container"></div>
+			</div>
+		</template>
+
+		<template id="props-general-template">
+			<div>
+				<div id="prop-identity">
+					<div class="alert alert-danger" style="display: none;">
+						<div class="alert-title">||str:ErrorsTitle||</div>
+						<div class="component-error"></div> 
+					</div>
+					<div class="alert alert-warning" style="display: none;">
+						<div class="alert-title">||str:WarningsTitle||</div>
+						<div class="component-warning"></div> 
+					</div>
+					<div class="row">
+						<div class="col-md-12">
+							<i class="fa fa-chevron-circle-up fa-2x color-white collapse-btn click-collapse" collapse="#prop-identity-data"></i>
+							<a class="unlink-link heading-txt click-collapse" collapse="#prop-identity-data">||str:IDTitle||</a>
+						</div>
+					</div>
+					<div class="divider-line"></div>
+					<div id="prop-identity-data">
+						<div class="row">
+							<div class="col-md-6">
+								<div class="color-white">||str:IDInput||</div>
+								<input id="prop-general-id-input" type="text" class="form-control" placeholder="||str:IDInputPH||" value="{{ ID }}" />
+							</div>
+							<div class="col-md-6">
+								<div class="color-white">||str:NameInput||</div>
+								<input id="prop-general-name-input" type="text" class="form-control" placeholder="||str:NameInputPH||" value="{{ Name }}" />
+							</div>
+							<div class="col-md-12">
+								<div class="color-white">||str:DescriptionInput||</div>
+								<input id="prop-general-desc-input" type="text" class="form-control prop-general-desc" placeholder="||str:DescInputPH||" value="{{ Description }}" />
+							</div>
+						</div>
+					</div>
+					<div class="divider-line"></div>
+					<div class="row">
+						<div class="col-md-12">
+							<i class="fa fa-chevron-circle-up fa-2x color-white collapse-btn click-collapse" collapse="#prop-connect-data"></i>
+							<a class="unlink-link heading-txt click-collapse" collapse="#prop-connect-data">||str:ConnectionsTitle||</a>
+						</div>
+					</div>
+					<div class="divider-line"></div>
+					<div id="prop-connect-data">
+						<div class="connect-list"></div>
+						<div class="color-white"><i class="fa fa-plus-circle fa-2x color-white click-add-connect"></i><span class='click-add-connect-msg'>||str:CreateConnection||</span></div>
+					</div>
+					<div class="divider-line"></div>
+				</div>
+			</div>
+		</template>
+
+		<template id="props-general-connection-template">
+			<div>
+				<div class="row">
+					<div class="col-md-3 col-md-offset-9">
+						<button class="btn btn-default color-white connect-delete"><i class="fa fa-trash-o color-white"></i></button>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-3">
+						<input class="form-control connect-subject" disabled="disabled" value="{{ SubjectName }}" />
+					</div>
+					<div class="col-md-3">
+						<button class="btn btn-default color-white connect-condition">{{ Condition }}</button>
+					</div>
+					<div class="col-md-3">
+						<input type="number" class="form-control connect-quantity" value="{{ Quantity }}" min="1" max="999" /> 
+					</div>
+					<div class="col-md-3">
+						<input class="form-control connect-target" value="{{ TargetName }}" placeholder="||str:TargetSelectBtn||" />
+					</div>
+				</div>
+			</div>
+		</template>
+
+		<template id="props-renderable-template">
+			<div>
+				<div id="prop-renderable">
+					<div class="alert alert-danger" style="display: none;">
+						<div class="alert-title">||str:ErrorsTitle||</div>
+						<div class="component-error"></div> 
+					</div>
+					<div class="alert alert-warning" style="display: none;">
+						<div class="alert-title">||str:WarningsTitle||</div>
+						<div class="component-warning"></div> 
+					</div>
+					<div class="row">
+						<div class="col-md-12">
+							<i class="fa fa-chevron-circle-up fa-2x color-white click-collapse" collapse="#prop-icons-data"></i>
+							<a class="unlink-link heading-txt click-collapse" collapse="#prop-icons-data">||str:IconsTitle||</a>
+						</div>
+					</div>
+					<div class="divider-line"></div>
+					<div id="prop-icons-data" class="collapse-target">
+						<div class="color-white">||str:SmallIconInput||</div>
+						<div class="row">
+							<div class="col-md-9">
+								<input id="prop-icon-small" type="text" class="form-control" placeholder="||str:SmallIconInputPH||" />
+							</div>
+							<div class="col-md-3">
+								<button id="prop-icon-small-browse" class="btn btn-default color-white"><i class="fa fa-ellipsis-h"></i></button>
+								<button id="prop-icon-small-sheet" class="btn btn-default color-white"><i class="fa fa-crop"></i></button>
+							</div>
+						</div>
+						<div class="color-white">||str:MediumIconInput||</div>
+						<div class="row">
+							<div class="col-md-9">
+								<input id="prop-icon-medium" type="text" class="form-control" placeholder="||str:MediumIconInputPH||" />
+							</div>
+							<div class="col-md-3">
+								<button id="prop-icon-medium-browse" class="btn btn-default color-white"><i class="fa fa-ellipsis-h"></i></button>
+								<button id="prop-icon-medium-sheet" class="btn btn-default color-white"><i class="fa fa-crop"></i></button>
+							</div>
+						</div>
+						<div class="color-white">||str:LargeIcon||</div>
+						<div class="row">
+							<div class="col-md-9">
+								<input id="prop-icon-large" type="text" class="form-control" placeholder="||str:LargeIconInputPH||" />
+							</div>
+							<div class="col-md-3">
+								<button id="prop-icon-large-browse" class="btn btn-default color-white"><i class="fa fa-ellipsis-h"></i></button>
+								<button id="prop-icon-large-sheet" class="btn btn-default color-white"><i class="fa fa-crop"></i></button>
+							</div>
+						</div>
+					</div>
+					<div class="divider-line"></div>
+				</div>
+			</div>
+		</template>
+
+		<template id="props-equipable-template">
+			<div>
+				<div id="prop-equipable">
+					<div class="alert alert-danger" style="display: none;">
+						<div class="alert-title">||str:ErrorsTitle||</div>
+						<div class="component-error"></div> 
+					</div>
+					<div class="alert alert-warning" style="display: none;">
+						<div class="alert-title">||str:WarningsTitle||</div>
+						<div class="component-warning"></div> 
+					</div>
+					<div class="row">
+						<div class="col-md-12">
+							<i class="fa fa-chevron-circle-up fa-2x color-white collapse-btn click-collapse" collapse="#prop-general-data"></i>
+							<a class="unlink-link heading-txt click-collapse" collapse="#prop-general-data">||str:GeneralTitle||</a>
+						</div>
+					</div>
+					<div class="divider-line"></div>
+					<div id="prop-general-data">
+						<div class="row">
+							<div class="col-md-4">
+								<div class="color-white">||str:EquipmentSlotInput||</div>
+								<div id="prop-equip-slot-insert"></div>
+							</div>
+							<div class="col-md-4">
+								<div class="color-white">||str:MinLevelInput||</div>
+								<input id="prop-equip-min-level" class="form-control" value="{{ MinLevel }}" />
+							</div>
+							<div class="col-md-4">
+								<div class="color-white">||str:MaxLevel||</div>
+								<input id="prop-equip-max-level" class="form-control" value="{{ MaxLevel }}" />
+							</div>
+						</div>
+					</div>
+					<div class="divider-line"></div>
+					<div class="row">
+						<div class="col-md-12">
+							<i class="fa fa-chevron-circle-up fa-2x color-white collapse-btn click-collapse" collapse="#prop-stat-data"></i>
+							<a class="unlink-link heading-txt click-collapse" collapse="#prop-stat-data">||str:StatsTitle||</a>
+						</div>
+					</div>
+					<div class="divider-line"></div>
+					<div id="prop-stat-data">
+
+					</div>
+					<div class="divider-line"></div>
+				</div>
+			</div>
+		</template>
+
+		<template id="props-consumable-template">
+			<div>
+				<div id="prop-consumable">
+					<div class="alert alert-danger" style="display: none;">
+						<div class="alert-title">||str:ErrorsTitle||</div>
+						<div class="component-error"></div> 
+					</div>
+					<div class="alert alert-warning" style="display: none;">
+						<div class="alert-title">||str:WarningsTitle||</div>
+						<div class="component-warning"></div> 
+					</div>
+					<div class="row">
+						<div class="col-md-12">
+							<i class="fa fa-chevron-circle-up fa-2x color-white collapse-btn click-collapse" collapse="#prop-consumable-data"></i>
+							<a class="unlink-link heading-txt click-collapse" collapse="#prop-consumable-data">||str:EffectsTitle||</a>
+						</div>
+					</div>
+					<div class="divider-line"></div>
+					<div id="prop-consumable-data" class="collapse-target">
+						
+					</div>
+					<div class="divider-line"></div>
+				</div>
+			</div>
+		</template>
+
+		<template id="props-tags-template">
+			<div>
+				<div id="prop-tag-data">
+					<div class="alert alert-danger" style="display: none;">
+						<div class="alert-title">||str:ErrorsTitle||</div>
+						<div class="component-error"></div> 
+					</div>
+					<div class="alert alert-warning" style="display: none;">
+						<div class="alert-title">||str:WarningsTitle</div>
+						<div class="component-warning"></div> 
+					</div>
+					<div class="row">
+						<div class="col-md-4 align-cntr">
+							<span class="color-white txt-heading">||str:KeysTitle||</span>
+							<div class="divider-line"></div>
+						</div>
+						<div class="col-md-4 align-cntr">
+							<span class="color-white txt-heading">||str:ValuesTitle||</span>
+							<div class="divider-line"></div>
+						</div>
+						<div class="col-md-4"></div>
+					</div>
+					<div id="tag-container"></div>
+				</div>
+				<div class="color-white"><i class="fa fa-plus-circle fa-2x click-add-tag"></i><span class="add-tag-sp">||str:AddTagBtn||</span></div>
+				<div class="divider-line"></div>
+			</div>
+		</template>
+
+		<template id="props-tag-template">
+			<div>
+				<div class="row">
+					<div class="col-md-4">
+						<input cid="{{ cid }}" class="form-control tag-key-input" value="{{ Key }}" placeholder="||str:TagKeyInputPH||" />
+					</div>
+					<div class="col-md-4">
+						<input cid="{{ cid }}" class="form-control tag-val-input" value="{{ Value }}" placeholder="||str:TagValueInputPH||" />
+					</div>
+					<div class="col-md-4">
+						<button cid="{{ cid }}" class="btn btn-default color-white tag-remove" title="delete tag">
+							<span class="fa fa-trash-o color-white"></span>
+						</button>
+					</div>
+				</div>
+			</div>
+		</template>
+
+		<template id="df-item-template">
+			<div>
+				<div class="panel panel-default df-item-panel">
+					<div class="panel-heading df-item-panel-heading">
+						<span class="df-item-name"></span>
+						<span class="fa fa-certificate color-error df-item-not-icon"></span>
+						<span class="fa fa-certificate color-warning df-item-not-icon"></span>
+					</div>
+					<div class="panel-body df-item-panel-body">
+						<div class="df-item-content"></div>
+					</div>
+				</div>
+			</div>
+		</template>
+
+		<template id="ced-menubar-template">
+			<div>
+				<div class="navbar navbar-default">
+					<div class="container-fluid bkg-grey">
+						<div class="navbar-header">
+							<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#gen-menubar-options">
+								<span class="sr-only">Toggle Nav</span>
+								<span class="icon-bar"></span>
+								<span class="icon-bar"></span>
+								<span class="icon-bar"></span>
+							</button>
+							<a class="navbar-brand" href="javascript:;">||str:CEDNavTitle||</a>
+						</div>
+						<div id="gen-menubar-options" class="collapse navbar-collapse">
+							<ul class="nav navbar-nav">
+								<li class="dropdown">
+									<a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown">||str:MBFile|| <span class="caret"></span></a>
+									<ul class="dropdown-menu">
+										<li><a id="ced-file-new" href="javascript:;">||str:CEDNewComponent||</a></li>
+										<li><a id="ced-file-load" href="javascript:;">||str:CEDLoadComponent||</a></li>
+										<li class="divider"></li>
+										<li><a id="ced-file-save" href="javascript:;">||str:MBSave||</a></li>
+										<li><a id="ced-file-save-as" href="javascript:;">||str:MBSaveAs||</a></li>
+										<li class="divider"></li>
+										<li><a id="ced-file-quit" href="javascript:;">||str:MBQuit||</a></li>
+									</ul>
+								</li>
+								<li class="dropdown">
+									<a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown">||str:MBEdit|| <span class="caret"></span></a>
+									<ul class="dropdown-menu">
+										<li id="ced-edit-add" class="dropdown dropdown-submenu"><a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown">||str:CEDAddParam||</a>
+											<ul class="dropdown-menu">
+												<li><a id="ced-add-text" href="javascript:;">||str:CEDTypeText||</a></li>
+												<li><a id="ced-add-number" href="javascript:;">||str:CEDTypeNumber||</a></li>
+												<li><a id="ced-add-dd" href="javascript:;">||str:CEDTypeDropdown||</a></li>
+												<li><a id="ced-add-color" href="javascript:;">||str:CEDTypeColor||</a></li>
+												<li><a id="ced-add-list" href="javascript:;">||str:CEDTypeList||</a></li>
+											</ul>
+										</li>
+									</ul>
+								</li>
+								<li class="dropdown">
+									<a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown">||str:MBView|| <span class="caret"></span></a>
+									<ul class="dropdown-menu">
+
+									</ul>
+								</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</template>
+
+		<template id="ced-page-template">
+			<div>
+				<div id="ced-menubar"></div>
+				<div class="row">
+					<div class="col-md-6">
+						<div id="ced-left"></div>
+					</div>
+					<div class="col-md-6">
+						<div id="ced-right">
+							<div class="panel panel-default">
+								<div class="panel-body">
+									<input id="comp-name-input" class="form-control ced-name-input" placeholder="||str:CEDCompNamePH||" />
+									<div class="divider-line"></div>
+									<h3 class="color-white">||str:CEDParamTitle||</h3>
+									<div class="well">
+										<div id="param-container"></div>
+									</div>
+									<div class="divider-line"></div>
+									<div>
+										<span id="ced-add-param" class="fa fa-2x fa-plus-square-o color-white ptr"></span>
+										<span class="ced-addparam color-white">||str:CEDAddParam||</span>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</template>
+
+		<template id="ced-param-template">
+			<div>
+				<div class="panel panel-default ced-param-panel">
+					<div class="panel-heading">
+						<input class="form-control param-name" type="text" placeholder="||str:CEDParamNamePH||" />
+						<div class="btn-group">
+							<div class="btn-group">
+								<button class="btn btn-default dropdown-toggle ced-param-type" data-toggle="dropdown">
+									<span class="ced-param-type-txt color-white"></span>
+									<span class="caret color-white"></span>
+								</button>
+								<ul class="dropdown-menu">
+									<li><a ptype="string" href="javascript:;">||str:CEDTypeText||</a></li>
+									<li><a ptype="number" href="javascript:;">||str:CEDTypeNumber||</a></li>
+									<li><a ptype="dropdown" href="javascript:;">||str:CEDTypeDropdown||</a></li>
+									<li><a ptype="color" href="javascript:;">||str:CEDTypeColor||</a></li>
+									<li><a ptype="list" href="javascript:;">||str:CEDTypeList||</a></li>
+								</ul>
+							</div>
+							<button class="btn btn-default ced-req"></button>
+							<button class="btn btn-default ced-regex"></button>
+							<button class="btn btn-default ced-regex"></button>
+						</div>
+						<button class="btn btn-default">||str:CEDRequired||</button>
+						<button class="btn btn-default">||str:CEDRegex||</button>
+						<span class="fa fa-trash-o color-white ced-remove-param"></span>
+					</div>
+					<div class="panel-body">
+
+					</div>
+				</div>
+			</div>
+		</template>
+
+		<template id="color-picker-template">
+			<div>
+				<div class="cp-top">
+					<div class="row">
+						<div class="col-md-4">
+							<label>||str:CPRed||</label>
+							<input class="form-control cp-red-input" value="{{ Red }}" />
+							<label>||str:CPGreen||</label>
+							<input class="form-control cp-green-input" value="{{ Green }}" />
+							<label>||str:CPBlue||</label>
+							<input class="form-control cp-blue-input" value="{{ Blue }}" />
+						</div>
+						<div class="col-md-8">
+							<div class="align-cntr w100">
+								<input type="text" class="form-control hex-io" value="{{ Hex }}" />
+							</div>
+							<div class="cp-color">
+								<div>
+									<div class="drag-box cp-c-drag-box"></div>
+									<div class="drag-box cp-bw-drag-box"></div>
+								</div>
+								<div>
+									<div class="drag-box cp-s-drag-box"></div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</template>
+
+		<template id="project-menu-template">
+			<div>
+				<div id="projmenu-body" class="row h100">
+					<div class="col-md-3">
+						<ul class="list-group">
+							<li class="list-group-item to-projlist"><a class="unlink-link to-projlist" href="javascript:;">||str:ProjListBtn||</a></li>
+							<li class="list-group-item to-restmap"><a class="unlink-link to-restmap" href="javascript:;">||str:ProjAPIMapping||</a></li>
+							<li class="list-group-item to-members"><a class="unlink-link to-members" href="javascript:;">||str:ManageMembers||</a></li>
+						</ul>
+					</div>
+					<div class="col-md-9 h100">
+						<div id="projmenu-content" class="panel panel-default"></div>
+					</div>
+				</div>
+			</div>
+		</template>
+
+		<template id="project-panel-template">
+			<div>
+				<div class="panel-heading">||str:ProjMenuTitle||</div>
+				<table class="table">
+					<thead>
+						<tr>
+							<th class="color-white">||str:ProjNameTTitle||</th>
+							<th class="color-white">||str:ProjCreateDateTTitle||</th>
+							<th class="color-white">||str:ProjLastDateTTitle||</th>
+							<th class="color-white">||str:ProjStatusTitle||</th>
+						</tr>
+					</thead>
+					<tbody></tbody>
+				</table>
+			</div>
+		</template>
+
+		<template id="project-tab-template">
+			<div>
+				<th scope="row" class="color-white">{{ ProjectName }}</th>
+				<td class="color-white">{{ CreateDate }}</td>
+				<td class="color-white">{{ LastSaveDate }}</td>
+			</div>
+		</template>
+
+		<template id="project-modal-template">
+			<div>
+				<div id="proj-modal" class="modal fade" tabindex="-1">
+					<div class="modal-dialog">
+						<div class="modal-content">
+							<div class="modal-header">
+								<button class="close" data-dismiss="modal"><span>&times;</span></button>
+								<h4 id="projmodal-name-title" class="modal-title">{{ ProjectName }}</h4>
+							</div>
+							<div class="modal-body">
+								<div id="proj-modal-body" class="container-fluid">
+									<div class="row">
+										<div class="col-md-6">
+											<label>||str:ProjMIDLabel||</label>
+											<div class="projm-lbl-pad">{{ ProjectID }}</div>
+										</div>
+										<div class="col-md-6">
+											<label>||str:ProjMNameLabel||</label>
+											<input id="projmodal-name-input" class="form-control color-white-bkg color-grey" type="text" value="{{ ProjectName }}" />
+										</div>
+									</div>
+									<div class="row">
+										<div class="col-md-6">
+											<label>||str:ProjMCreateDate||</label>
+											<div class="projm-lbl-pad">{{ CreateDate }}</div>
+										</div>
+										<div class="col-md-6">
+											<label>||str:ProjMLastEdit||</label>
+											<div class="projm-lbl-pad">{{ LastSaveDate }}</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="modal-footer">
+								<button id="proj-load" class="btn btn-default flt-left color-white">||str:ProjModalLoad||</button>
+								<button id="proj-cancel" class="btn btn-default color-white" data-dismiss="modal">||str:ProjModalCancel||</button>
+								<button id="proj-apply" class="btn btn-default disabled color-white">||str:ProjModalApply||</button>
+								<button id="proj-ok" class="btn btn-default color-white" data-dismiss="modal">||str:ProjModalOK||</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</template>
+
+		<template id="loader-template">
+			<div>
+				<div id="loader" class="modal fade" tabindex="-1">
+					<div class="modal-dialog">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h4 class="modal-title">{{ Title }}</h4>
+							</div>
+							<div class="modal-body">
+								<div>{{ Text }}</div>
+								<div class="progress">
+									<div id="loader-pbar" class="progress-bar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;"></div>
+								</div>
+							</div>
+							<div class="modal-footer">
+								<button id="loader-cancel" class="btn btn-default color-white" data-dismiss="modal">||str:BtnCancel||</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</template>
+
+    </body>
+</html>
